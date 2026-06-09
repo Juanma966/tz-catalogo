@@ -2,6 +2,7 @@
 
 import { FC, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
 import { authService } from '../services/authService';
 
 export const LogoutButton: FC = () => {
@@ -16,12 +17,14 @@ export const LogoutButton: FC = () => {
   };
 
   return (
-    <button
+    <Button
+      variant="outline"
+      size="sm"
       onClick={handleLogout}
       disabled={loading}
-      className="px-4 py-2 text-sm bg-slate-700 hover:bg-slate-600 disabled:opacity-60 rounded-md transition-colors"
+      className="border-slate-700 text-slate-300 hover:text-white hover:bg-slate-800"
     >
       {loading ? 'Cerrando...' : 'Cerrar sesión'}
-    </button>
+    </Button>
   );
 };
