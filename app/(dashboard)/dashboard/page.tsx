@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase/server';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Package, BookOpen, CheckCircle } from 'lucide-react';
 
 export const metadata = { title: 'Dashboard' };
@@ -24,31 +23,31 @@ export default async function DashboardPage() {
     ]);
 
   const stats = [
-    { label: 'Productos activos', value: totalProductos ?? 0, icon: Package },
-    { label: 'Catálogos totales', value: totalCatalogos ?? 0, icon: BookOpen },
-    { label: 'Catálogos publicados', value: catalogosPublicados ?? 0, icon: CheckCircle },
+    { label: 'Productos activos', value: totalProductos ?? 0, icon: Package, color: 'text-blue-600', bg: 'bg-blue-50' },
+    { label: 'Catálogos totales', value: totalCatalogos ?? 0, icon: BookOpen, color: 'text-violet-600', bg: 'bg-violet-50' },
+    { label: 'Catálogos publicados', value: catalogosPublicados ?? 0, icon: CheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-50' },
   ];
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        <p className="text-slate-400 mt-1">
+        <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
+        <p className="text-gray-500 mt-1 text-sm">
           Bienvenido, {usuario?.nombre_completo ?? user?.email}
         </p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {stats.map(({ label, value, icon: Icon }) => (
-          <Card key={label} className="bg-slate-900 border-slate-800">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-slate-400">{label}</CardTitle>
-              <Icon size={16} className="text-slate-500" />
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold text-white">{value}</p>
-            </CardContent>
-          </Card>
+        {stats.map(({ label, value, icon: Icon, color, bg }) => (
+          <div key={label} className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-medium text-gray-500">{label}</span>
+              <div className={`w-9 h-9 rounded-lg ${bg} flex items-center justify-center`}>
+                <Icon size={17} className={color} />
+              </div>
+            </div>
+            <p className="text-3xl font-bold text-gray-900">{value}</p>
+          </div>
         ))}
       </div>
     </div>

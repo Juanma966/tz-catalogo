@@ -2,7 +2,7 @@
 
 import { FC, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
+import { LogOut } from 'lucide-react';
 import { authService } from '../services/authService';
 
 export const LogoutButton: FC = () => {
@@ -17,14 +17,13 @@ export const LogoutButton: FC = () => {
   };
 
   return (
-    <Button
-      variant="outline"
-      size="sm"
+    <button
       onClick={handleLogout}
       disabled={loading}
-      className="border-slate-700 text-slate-300 hover:text-white hover:bg-slate-800"
+      className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 disabled:opacity-50 transition-colors px-2 py-1.5 rounded-lg hover:bg-gray-100"
     >
-      {loading ? 'Cerrando...' : 'Cerrar sesión'}
-    </Button>
+      <LogOut size={15} />
+      {loading ? 'Saliendo...' : 'Salir'}
+    </button>
   );
 };
