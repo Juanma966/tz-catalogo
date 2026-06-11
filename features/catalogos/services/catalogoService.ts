@@ -74,6 +74,24 @@ export const catalogoService = {
       .eq('id', id);
     if (error) throw new Error(error.message);
   },
+  async actualizarPDF(
+  id: string,
+  pdfUrl: string
+): Promise<void> {
+  const supabase = createClient();
+
+  const { error } = await supabase
+    .from('catalogos')
+    .update({
+      pdf_url: pdfUrl,
+      estado: 'publicado',
+    })
+    .eq('id', id);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+},
 
   async eliminar(id: string): Promise<void> {
     const supabase = createClient();

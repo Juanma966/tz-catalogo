@@ -20,4 +20,4 @@ export interface CrearProductoInput {
   activo?: boolean;
 }
 
-export interface ActualizarProductoInput extends Partial<CrearProductoInput> {}
+export type ActualizarProductInput = Partial<CrearProductoInput>;
