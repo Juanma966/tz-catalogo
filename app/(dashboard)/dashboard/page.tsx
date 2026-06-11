@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { Package, BookOpen, CheckCircle } from 'lucide-react';
 
-export const metadata = { title: 'Dashboard' };
+export const metadata = { title: 'Menu' };
 
 export default async function DashboardPage() {
   const supabase = await createClient();

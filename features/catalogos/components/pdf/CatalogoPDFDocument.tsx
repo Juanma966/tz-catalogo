@@ -1,4 +1,4 @@
-import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
 import type { CatalogoPDF } from '@/features/catalogos/types/catalogo-pdf.types';
 
 interface CatalogoPDFDocumentProps {
@@ -17,10 +17,12 @@ const s = StyleSheet.create({
   divider:     { borderBottomWidth: 1, borderBottomColor: '#e2e8f0', marginTop: 14, marginBottom: 12 },
   thead:       { flexDirection: 'row', backgroundColor: '#f8fafc', paddingHorizontal: 6, paddingVertical: 7, borderRadius: 3 },
   theadText:   { fontSize: 8, color: '#94a3b8', fontFamily: 'Helvetica-Bold' },
-  row:         { flexDirection: 'row', paddingHorizontal: 6, paddingVertical: 9, borderBottomWidth: 1, borderBottomColor: '#f1f5f9' },
-  rowAlt:      { flexDirection: 'row', paddingHorizontal: 6, paddingVertical: 9, borderBottomWidth: 1, borderBottomColor: '#f1f5f9', backgroundColor: '#fafafa' },
+  row:         { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 6, paddingVertical: 7, borderBottomWidth: 1, borderBottomColor: '#f1f5f9' },
+  rowAlt:      { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 6, paddingVertical: 7, borderBottomWidth: 1, borderBottomColor: '#f1f5f9', backgroundColor: '#fafafa' },
   cell:        { fontSize: 10, color: '#374151' },
-  c1:          { flex: 4 },
+  img:         { width: 32, height: 32, borderRadius: 4, objectFit: 'cover' },
+  imgPlaceholder: { width: 32, height: 32, borderRadius: 4, backgroundColor: '#e2e8f0' },
+  c1:          { flex: 4, flexDirection: 'row', alignItems: 'center', gap: 8 },
   c2:          { flex: 1 },
   c3:          { flex: 2 },
   c4:          { flex: 2 },
@@ -61,7 +63,13 @@ export const CatalogoPDFDocument = ({ catalogo }: CatalogoPDFDocumentProps) => {
         {/* Filas de productos */}
         {catalogo.items.map((item, i) => (
           <View key={item.id} style={i % 2 === 0 ? s.row : s.rowAlt}>
-            <View style={s.c1}><Text style={s.cell}>{item.nombre_producto}</Text></View>
+            <View style={s.c1}>
+              {item.imagen_url
+                ? <Image style={s.img} src={item.imagen_url} />
+                : <View style={s.imgPlaceholder} />
+              }
+              <Text style={s.cell}>{item.nombre_producto}</Text>
+            </View>
             <View style={s.c2}><Text style={[s.cell, { textAlign: 'center' }]}>{item.cantidad}</Text></View>
             <View style={s.c3}><Text style={[s.cell, { textAlign: 'right' }]}>{fmt(item.precio_unitario)}</Text></View>
             <View style={s.c4}><Text style={[s.cell, { textAlign: 'right' }]}>{fmt(item.subtotal)}</Text></View>

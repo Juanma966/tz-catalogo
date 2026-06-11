@@ -3,7 +3,8 @@
 import { FC, useState } from 'react';
 import { ExternalLink, FileText, Loader2, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -101,17 +102,15 @@ export const CatalogosList: FC = () => {
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
                         {catalogo.pdf_url && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            asChild
-                            className="h-8 w-8 text-blue-500 hover:text-blue-600 hover:bg-blue-50"
+                          <a
+                            href={catalogo.pdf_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             title="Ver PDF"
+                            className={cn(buttonVariants({ variant: 'ghost', size: 'icon' }), 'h-8 w-8 text-blue-500 hover:text-blue-600 hover:bg-blue-50')}
                           >
-                            <a href={catalogo.pdf_url} target="_blank" rel="noopener noreferrer">
-                              <ExternalLink size={14} />
-                            </a>
-                          </Button>
+                            <ExternalLink size={14} />
+                          </a>
                         )}
                         <Button
                           variant="ghost"
