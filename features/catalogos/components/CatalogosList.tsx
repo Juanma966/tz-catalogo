@@ -1,7 +1,7 @@
 'use client';
 
 import { FC, useState } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import { ExternalLink, FileText, Loader2, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -14,10 +14,12 @@ import {
 import { CatalogoBadge } from './CatalogoBadge';
 import { NuevoCatalogoWizard } from './NuevoCatalogoWizard';
 import { useCatalogos } from '../hooks/useCatalogos';
+import { useGenerarPDF } from '../hooks/useGenerarPDF';
 import { catalogoService } from '../services/catalogoService';
 
 export const CatalogosList: FC = () => {
   const { catalogos, loading, error, reload } = useCatalogos();
+  const { generarPDF, generando } = useGenerarPDF(reload);
   const [wizardOpen, setWizardOpen] = useState(false);
   const [eliminando, setEliminando] = useState<string | null>(null);
 
@@ -53,15 +55,15 @@ export const CatalogosList: FC = () => {
         </Button>
       </div>
 
-      <div className="rounded-xl border border-gray-200 overflow-hidden bg-white shadow-sm">
+      <div className="rounded-xl border border-gray-200 overflow-x-auto bg-white shadow-sm">
         <Table>
           <TableHeader>
             <TableRow className="border-gray-200 hover:bg-transparent bg-gray-50">
               <TableHead className="text-gray-500 font-medium">Cliente</TableHead>
-              <TableHead className="text-gray-500 font-medium">Tipo de lista</TableHead>
-              <TableHead className="text-gray-500 font-medium">Vencimiento</TableHead>
+              <TableHead className="text-gray-500 font-medium hidden sm:table-cell">Tipo</TableHead>
+              <TableHead className="text-gray-500 font-medium hidden md:table-cell">Vencimiento</TableHead>
               <TableHead className="text-gray-500 font-medium text-right">Total</TableHead>
-              <TableHead className="text-gray-500 font-medium text-center">Estado</TableHead>
+              <TableHead className="text-gray-500 font-medium text-center hidden sm:table-cell">Estado</TableHead>
               <TableHead className="text-gray-500 font-medium text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
@@ -81,32 +83,64 @@ export const CatalogosList: FC = () => {
                 </TableCell>
               </TableRow>
             ) : (
-              catalogos.map((catalogo) => (
-                <TableRow key={catalogo.id} className="border-gray-100 hover:bg-gray-50">
-                  <TableCell className="font-medium text-gray-900">{catalogo.nombre_cliente}</TableCell>
-                  <TableCell className="capitalize text-gray-600 text-sm">{catalogo.tipo_lista}</TableCell>
-                  <TableCell className="text-gray-600 text-sm">
-                    {new Date(catalogo.fecha_vencimiento + 'T00:00:00').toLocaleDateString('es-AR')}
-                  </TableCell>
-                  <TableCell className="text-right font-medium text-gray-900">
-                    {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(catalogo.total)}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <CatalogoBadge estado={catalogo.estado} />
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      disabled={eliminando === catalogo.id}
-                      onClick={() => handleEliminar(catalogo.id, catalogo.nombre_cliente)}
-                      className="h-8 w-8 text-gray-400 hover:text-red-500 hover:bg-red-50"
-                    >
-                      <Trash2 size={14} />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
+              catalogos.map((catalogo) => {
+                const ocupado = generando === catalogo.id || eliminando === catalogo.id;
+                return (
+                  <TableRow key={catalogo.id} className="border-gray-100 hover:bg-gray-50">
+                    <TableCell className="font-medium text-gray-900">{catalogo.nombre_cliente}</TableCell>
+                    <TableCell className="capitalize text-gray-600 text-sm hidden sm:table-cell">{catalogo.tipo_lista}</TableCell>
+                    <TableCell className="text-gray-600 text-sm hidden md:table-cell">
+                      {new Date(catalogo.fecha_vencimiento + 'T00:00:00').toLocaleDateString('es-AR')}
+                    </TableCell>
+                    <TableCell className="text-right font-medium text-gray-900">
+                      {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(catalogo.total)}
+                    </TableCell>
+                    <TableCell className="text-center hidden sm:table-cell">
+                      <CatalogoBadge estado={catalogo.estado} />
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        {catalogo.pdf_url && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            asChild
+                            className="h-8 w-8 text-blue-500 hover:text-blue-600 hover:bg-blue-50"
+                            title="Ver PDF"
+                          >
+                            <a href={catalogo.pdf_url} target="_blank" rel="noopener noreferrer">
+                              <ExternalLink size={14} />
+                            </a>
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          disabled={ocupado}
+                          onClick={() => generarPDF(catalogo.id, catalogo.nombre_cliente)}
+                          className="h-8 w-8 text-gray-400 hover:text-blue-600 hover:bg-blue-50 disabled:opacity-50"
+                          title="Generar PDF"
+                        >
+                          {generando === catalogo.id
+                            ? <Loader2 size={14} className="animate-spin" />
+                            : <FileText size={14} />
+                          }
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          disabled={ocupado}
+                          onClick={() => handleEliminar(catalogo.id, catalogo.nombre_cliente)}
+                          className="h-8 w-8 text-gray-400 hover:text-red-500 hover:bg-red-50 disabled:opacity-50"
+                          title="Eliminar"
+                        >
+                          <Trash2 size={14} />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             )}
           </TableBody>
         </Table>

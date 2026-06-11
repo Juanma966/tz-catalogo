@@ -27,8 +27,12 @@ export const catalogoService = {
   async crear(empresaId: string, usuarioId: string, form: NuevoCatalogoForm): Promise<Catalogo> {
     const supabase = createClient();
 
+    const esMayorista = form.tipo_lista === 'mayorista';
+    const precioEfectivo = (p: typeof form.items[0]['producto']) =>
+      esMayorista ? (p.precio_mayorista ?? p.precio_base) : p.precio_base;
+
     const subtotal = form.items.reduce(
-      (acc, { producto, cantidad }) => acc + producto.precio_base * cantidad,
+      (acc, { producto, cantidad }) => acc + precioEfectivo(producto) * cantidad,
       0
     );
 
@@ -49,16 +53,19 @@ export const catalogoService = {
 
     if (errorCatalogo) throw new Error(errorCatalogo.message);
 
-    const items = form.items.map((item, index) => ({
-      catalogo_id: catalogo.id,
-      producto_id: item.producto.id,
-      nombre_producto: item.producto.nombre,
-      precio_unitario: item.producto.precio_base,
-      cantidad: item.cantidad,
-      subtotal: item.producto.precio_base * item.cantidad,
-      imagen_url: item.producto.imagen_url,
-      posicion: index + 1,
-    }));
+    const items = form.items.map((item, index) => {
+      const precio = precioEfectivo(item.producto);
+      return {
+        catalogo_id: catalogo.id,
+        producto_id: item.producto.id,
+        nombre_producto: item.producto.nombre,
+        precio_unitario: precio,
+        cantidad: item.cantidad,
+        subtotal: precio * item.cantidad,
+        imagen_url: item.producto.imagen_url,
+        posicion: index + 1,
+      };
+    });
 
     const { error: errorItems } = await supabase.from('catalogo_items').insert(items);
     if (errorItems) throw new Error(errorItems.message);

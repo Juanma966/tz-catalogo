@@ -25,6 +25,7 @@ const schema = z.object({
   nombre: z.string().min(1, 'El nombre es requerido').max(100),
   descripcion: z.string().max(300).optional(),
   precio_base: z.coerce.number().positive('El precio debe ser mayor a 0'),
+  precio_mayorista: z.coerce.number().positive('Debe ser mayor a 0').optional().or(z.literal('')),
   codigo_sku: z.string().max(50).optional(),
 });
 
@@ -50,6 +51,7 @@ export const ProductoForm: FC<ProductoFormProps> = ({ producto, onSuccess, onCan
       nombre: producto?.nombre ?? '',
       descripcion: producto?.descripcion ?? '',
       precio_base: producto?.precio_base ?? 0,
+      precio_mayorista: producto?.precio_mayorista ?? '',
       codigo_sku: producto?.codigo_sku ?? '',
     },
   });
@@ -96,6 +98,9 @@ export const ProductoForm: FC<ProductoFormProps> = ({ producto, onSuccess, onCan
         nombre: values.nombre,
         descripcion: values.descripcion || undefined,
         precio_base: values.precio_base,
+        precio_mayorista: values.precio_mayorista !== '' && values.precio_mayorista != null
+          ? Number(values.precio_mayorista)
+          : null,
         codigo_sku: values.codigo_sku || undefined,
         imagen_url: imagen_url ?? undefined,
       };
@@ -177,7 +182,7 @@ export const ProductoForm: FC<ProductoFormProps> = ({ producto, onSuccess, onCan
         <div className="grid grid-cols-2 gap-3">
           <FormField control={form.control} name="precio_base" render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-gray-700">Precio base *</FormLabel>
+              <FormLabel className="text-gray-700">Precio público *</FormLabel>
               <FormControl>
                 <Input type="number" step="0.01" min="0" placeholder="0.00" className="border-gray-300 focus:border-blue-500" {...field} />
               </FormControl>
@@ -185,16 +190,26 @@ export const ProductoForm: FC<ProductoFormProps> = ({ producto, onSuccess, onCan
             </FormItem>
           )} />
 
-          <FormField control={form.control} name="codigo_sku" render={({ field }) => (
+          <FormField control={form.control} name="precio_mayorista" render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-gray-700">Código SKU</FormLabel>
+              <FormLabel className="text-gray-700">Precio mayorista</FormLabel>
               <FormControl>
-                <Input placeholder="Ej: HP-LAP-001" className="border-gray-300 focus:border-blue-500" {...field} />
+                <Input type="number" step="0.01" min="0" placeholder="0.00 (opcional)" className="border-gray-300 focus:border-blue-500" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )} />
         </div>
+
+        <FormField control={form.control} name="codigo_sku" render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-gray-700">Código SKU</FormLabel>
+            <FormControl>
+              <Input placeholder="Ej: HP-LAP-001" className="border-gray-300 focus:border-blue-500" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )} />
 
         {form.formState.errors.root && (
           <p className="text-sm text-red-500">{form.formState.errors.root.message}</p>

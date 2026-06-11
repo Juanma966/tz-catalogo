@@ -4,6 +4,7 @@ export interface Producto {
   nombre: string;
   descripcion: string | null;
   precio_base: number;
+  precio_mayorista: number | null;
   imagen_url: string | null;
   codigo_sku: string | null;
   activo: boolean;
@@ -15,9 +16,10 @@ export interface CrearProductoInput {
   nombre: string;
   descripcion?: string;
   precio_base: number;
+  precio_mayorista?: number | null;
   codigo_sku?: string;
   imagen_url?: string;
   activo?: boolean;
 }
 
-export type ActualizarProductInput = Partial<CrearProductoInput>;
+export type ActualizarProductoInput = Partial<CrearProductoInput>;

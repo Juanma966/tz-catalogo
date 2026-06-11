@@ -11,7 +11,6 @@ export interface CatalogoPDFItem {
 
   imagen_url: string | null;
 
-  posicion: number;
 }
 
 export interface CatalogoPDF {

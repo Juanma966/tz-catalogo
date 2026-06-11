@@ -1,11 +1,10 @@
-import { createClient } from '@/lib/supabase/client';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 export async function uploadPDF(
   fileName: string,
-  pdfBlob: Blob
+  pdfBlob: Blob,
+  supabase: SupabaseClient
 ): Promise<string> {
-  const supabase = createClient();
-
   const { error } = await supabase.storage
     .from('catalogos-pdf')
     .upload(fileName, pdfBlob, {
@@ -13,9 +12,7 @@ export async function uploadPDF(
       upsert: true,
     });
 
-  if (error) {
-    throw new Error(error.message);
-  }
+  if (error) throw new Error(error.message);
 
   const { data } = supabase.storage
     .from('catalogos-pdf')

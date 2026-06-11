@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useProductos } from '@/features/productos/hooks/useProductos';
-import type { ItemSeleccionado, NuevoCatalogoForm } from '../types/catalogo.types';
+import type { ItemSeleccionado, NuevoCatalogoForm, TipoLista } from '../types/catalogo.types';
 
 const FORMATO_PRECIO = new Intl.NumberFormat('es-AR', {
   style: 'currency', currency: 'ARS', minimumFractionDigits: 2,
@@ -13,11 +13,15 @@ const FORMATO_PRECIO = new Intl.NumberFormat('es-AR', {
 
 interface PasoProductosProps {
   items: NuevoCatalogoForm['items'];
+  tipoLista: TipoLista;
   onSiguiente: (items: ItemSeleccionado[]) => void;
   onAtras: () => void;
 }
 
-export const PasoProductos: FC<PasoProductosProps> = ({ items: itemsIniciales, onSiguiente, onAtras }) => {
+export const PasoProductos: FC<PasoProductosProps> = ({ items: itemsIniciales, tipoLista, onSiguiente, onAtras }) => {
+  const esMayorista = tipoLista === 'mayorista';
+  const precioVisible = (p: { precio_base: number; precio_mayorista?: number | null }) =>
+    esMayorista ? (p.precio_mayorista ?? p.precio_base) : p.precio_base;
   const { productos, loading } = useProductos();
   const [seleccionados, setSeleccionados] = useState<Map<string, ItemSeleccionado>>(() => {
     const mapa = new Map<string, ItemSeleccionado>();
@@ -50,7 +54,7 @@ export const PasoProductos: FC<PasoProductosProps> = ({ items: itemsIniciales, o
   };
 
   const totalGeneral = Array.from(seleccionados.values()).reduce(
-    (acc, { producto, cantidad }) => acc + producto.precio_base * cantidad, 0
+    (acc, { producto, cantidad }) => acc + precioVisible(producto) * cantidad, 0
   );
 
   const handleSiguiente = () => {
@@ -106,7 +110,7 @@ export const PasoProductos: FC<PasoProductosProps> = ({ items: itemsIniciales, o
 
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900 truncate">{producto.nombre}</p>
-                  <p className="text-xs text-gray-500">{FORMATO_PRECIO.format(producto.precio_base)}</p>
+                  <p className="text-xs text-gray-500">{FORMATO_PRECIO.format(precioVisible(producto))}</p>
                 </div>
 
                 {seleccionado && (
@@ -125,7 +129,7 @@ export const PasoProductos: FC<PasoProductosProps> = ({ items: itemsIniciales, o
 
                 {seleccionado && (
                   <p className="text-sm font-medium text-gray-900 w-24 text-right shrink-0">
-                    {FORMATO_PRECIO.format(producto.precio_base * seleccionado.cantidad)}
+                    {FORMATO_PRECIO.format(precioVisible(producto) * seleccionado.cantidad)}
                   </p>
                 )}
               </div>

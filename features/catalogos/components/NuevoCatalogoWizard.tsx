@@ -83,7 +83,7 @@ export const NuevoCatalogoWizard: FC<NuevoCatalogoWizardProps> = ({ onSuccess })
       </div>
 
       {paso === 0 && <PasoConfiguracion datos={form} onSiguiente={handlePaso1} />}
-      {paso === 1 && <PasoProductos items={form.items} onSiguiente={handlePaso2} onAtras={() => setPaso(0)} />}
+      {paso === 1 && <PasoProductos items={form.items} tipoLista={form.tipo_lista} onSiguiente={handlePaso2} onAtras={() => setPaso(0)} />}
       {paso === 2 && <PasoResumen form={form} guardando={guardando} onConfirmar={handleConfirmar} onAtras={() => setPaso(1)} />}
     </div>
   );
