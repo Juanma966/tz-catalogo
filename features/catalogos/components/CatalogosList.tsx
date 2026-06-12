@@ -17,6 +17,7 @@ import { NuevoCatalogoWizard } from './NuevoCatalogoWizard';
 import { useCatalogos } from '../hooks/useCatalogos';
 import { useGenerarPDF } from '../hooks/useGenerarPDF';
 import { catalogoService } from '../services/catalogoService';
+import { CompartirWhatsAppButton } from './CompartirWhatsAppButton';
 
 export const CatalogosList: FC = () => {
   const { catalogos, loading, error, reload } = useCatalogos();
@@ -111,6 +112,12 @@ export const CatalogosList: FC = () => {
                           >
                             <ExternalLink size={14} />
                           </a>
+                        )}
+                        {catalogo.pdf_url && (
+                          <CompartirWhatsAppButton
+                              pdfUrl={catalogo.pdf_url}
+                              nombreCliente={catalogo.nombre_cliente}
+                            />
                         )}
                         <Button
                           variant="ghost"
