@@ -11,21 +11,33 @@ const fmt = (n: number) =>
 const s = StyleSheet.create({
   page:        { padding: 40, backgroundColor: '#ffffff' },
   title:       { fontSize: 20, fontFamily: 'Helvetica-Bold', color: '#1e293b', marginBottom: 5 },
-  subtitle:       { fontSize: 12, fontFamily: 'Helvetica-Bold', color: '#3667b6', marginBottom: 5 },
+  subtitle:    { fontSize: 12, fontFamily: 'Helvetica-Bold', color: '#3667b6', marginBottom: 5 },
   meta:        { fontSize: 10, color: '#64748b', marginBottom: 3 },
   badge:       { backgroundColor: '#dbeafe', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 4, alignSelf: 'flex-start', marginTop: 6 },
   badgeText:   { fontSize: 9, color: '#1d4ed8', fontFamily: 'Helvetica-Bold' },
   divider:     { borderBottomWidth: 1, borderBottomColor: '#e2e8f0', marginTop: 14, marginBottom: 12 },
-  thead:       { flexDirection: 'row', backgroundColor: '#f8fafc', paddingHorizontal: 10, paddingVertical: 7, borderRadius: 3, gap: 12 },
-  theadText:   { fontSize: 8, color: '#94a3b8', fontFamily: 'Helvetica-Bold' },
-  row:         { flexDirection: 'row', alignItems: 'flex-start', paddingHorizontal: 10, paddingVertical: 9, marginTop: 6, borderRadius: 6, backgroundColor: '#eff6ff', gap: 12 },
-  cell:        { fontSize: 10, color: '#374151' },
-  img:         { width: 32, height: 32, borderRadius: 4, objectFit: 'cover' },
-  imgPlaceholder: { width: 32, height: 32, borderRadius: 4, backgroundColor: '#e2e8f0' },
-  c1:          { flex: 4, flexDirection: 'row', alignItems: 'center', gap: 8, marginRight: 28 },
-  c2:          { flex: 1 },
+  
+  // Agrandamos un poquito la cabecera de la tabla para que acompañe el diseño
+  thead:       { flexDirection: 'row', backgroundColor: '#f8fafc', paddingHorizontal: 10, paddingVertical: 9, borderRadius: 3, gap: 12 },
+  theadText:   { fontSize: 10, color: '#94a3b8', fontFamily: 'Helvetica-Bold' }, // Subió de 8 a 10
+  
+  // Agrandamos la fila dándole más padding vertical (de 9 subió a 14)
+  row:         { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 14, marginTop: 8, borderRadius: 6, backgroundColor: '#eff6ff', gap: 12 },
+  
+  // Agrandamos el texto del producto, precio, etc. (de 10 subió a 12)
+  cell:        { fontSize: 12, color: '#374151' }, 
+  
+  // ¡Fotos más grandes! Pasaron de 32x32 a 48x48 píxeles
+  img:         { width: 48, height: 48, borderRadius: 6, objectFit: 'cover' },
+  imgPlaceholder: { width: 48, height: 48, borderRadius: 6, backgroundColor: '#e2e8f0' },
+  
+  // Columnas (las dejamos igual para que mantengan la proporción)
+  c1:          { flex: 4, flexDirection: 'row', alignItems: 'center', gap: 10, marginRight: 28 },
+  c1text:      { flex: 1 },
+  c2:          { flex: 1, marginLeft: 12 },
   c3:          { flex: 2 },
   c4:          { flex: 3 },
+  
   footer:      { position: 'absolute', bottom: 24, left: 40, right: 40, borderTopWidth: 1, borderTopColor: '#e2e8f0', paddingTop: 8, alignItems: 'center' },
   footerText:  { fontSize: 9, color: '#64748b' },
 });
@@ -41,7 +53,7 @@ export const CatalogoPDFDocument = ({ catalogo }: CatalogoPDFDocumentProps) => {
 
         {/* Encabezado */}
         <View>
-          <Text style={s.title}>TECNOZOVAK - CATÀLOGO </Text>
+          <Text style={s.title}>TEKNOZOVAK - CATALOGO </Text>
           <Text style={s.subtitle}>Telefono: 2645212661 - 2645238881 </Text>
           <Text style={s.meta}>Para: {catalogo.nombre_cliente}</Text>
           <Text style={s.meta}>Emitido: {fechaEmision}  —  Vence: {fechaVence}</Text>
@@ -68,10 +80,10 @@ export const CatalogoPDFDocument = ({ catalogo }: CatalogoPDFDocumentProps) => {
                 ? <Image style={s.img} src={item.imagen_url} />
                 : <View style={s.imgPlaceholder} />
               }
-              <Text style={s.cell}>{item.nombre_producto}</Text>
+              <View style={s.c1text}><Text style={[s.cell, { fontFamily: 'Helvetica-Bold' }]}>{item.nombre_producto}</Text></View>
             </View>
             <View style={s.c2}><Text style={[s.cell, { textAlign: 'center' }]}>{item.cantidad}</Text></View>
-            <View style={s.c3}><Text style={[s.cell, { textAlign: 'right' }]}>{fmt(item.precio_unitario)}</Text></View>
+            <View style={s.c3}><Text style={[s.cell, { textAlign: 'right', fontFamily: 'Helvetica-Bold' }]}>{fmt(item.precio_unitario)}</Text></View>
             <View style={s.c4}><Text style={s.cell}>{item.descripcion || '—'}</Text></View>
           </View>
         ))}
