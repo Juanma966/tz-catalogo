@@ -57,7 +57,7 @@ export default async function DashboardPage() {
 
   const { data: ultimosCatalogos } = await supabase
     .from('catalogos')
-    .select('id, nombre_cliente, estado, total, created_at')
+    .select('id, nombre_cliente, estado, created_at')
     .eq('empresa_id', empresaId)
     .order('created_at', { ascending: false })
     .limit(5);
@@ -164,13 +164,6 @@ export default async function DashboardPage() {
                 </div>
 
                 <div className="text-right">
-                  <p className="font-medium text-gray-900">
-                    {new Intl.NumberFormat('es-AR', {
-                      style: 'currency',
-                      currency: 'ARS',
-                    }).format(catalogo.total)}
-                  </p>
-
                   <p className="text-sm text-gray-500 capitalize">
                     {catalogo.estado}
                   </p>

@@ -19,6 +19,7 @@ export default function TestPdfPage() {
         {
           id: '1',
           nombre_producto: 'Producto Test',
+          descripcion: 'Descripción de prueba',
           cantidad: 2,
           precio_unitario: 500,
           subtotal: 1000,

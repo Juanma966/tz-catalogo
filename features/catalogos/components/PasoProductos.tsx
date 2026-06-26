@@ -43,16 +43,6 @@ export const PasoProductos: FC<PasoProductosProps> = ({ items: itemsIniciales, t
     });
   };
 
-  const cambiarCantidad = (productoId: string, cantidad: number) => {
-    if (cantidad < 1) return;
-    setSeleccionados((prev) => {
-      const nuevo = new Map(prev);
-      const item = nuevo.get(productoId);
-      if (item) nuevo.set(productoId, { ...item, cantidad });
-      return nuevo;
-    });
-  };
-
   const totalGeneral = Array.from(seleccionados.values()).reduce(
     (acc, { producto, cantidad }) => acc + precioVisible(producto) * cantidad, 0
   );
@@ -112,20 +102,6 @@ export const PasoProductos: FC<PasoProductosProps> = ({ items: itemsIniciales, t
                   <p className="text-sm font-medium text-gray-900 truncate">{producto.nombre}</p>
                   <p className="text-xs text-gray-500">{FORMATO_PRECIO.format(precioVisible(producto))}</p>
                 </div>
-
-                {seleccionado && (
-                  <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
-                    <button type="button"
-                      onClick={() => cambiarCantidad(producto.id, seleccionado.cantidad - 1)}
-                      className="w-6 h-6 rounded border border-gray-300 bg-white hover:bg-gray-100 text-gray-700 text-sm flex items-center justify-center"
-                    >−</button>
-                    <span className="w-8 text-center text-sm text-gray-900">{seleccionado.cantidad}</span>
-                    <button type="button"
-                      onClick={() => cambiarCantidad(producto.id, seleccionado.cantidad + 1)}
-                      className="w-6 h-6 rounded border border-gray-300 bg-white hover:bg-gray-100 text-gray-700 text-sm flex items-center justify-center"
-                    >+</button>
-                  </div>
-                )}
 
                 {seleccionado && (
                   <p className="text-sm font-medium text-gray-900 w-24 text-right shrink-0">

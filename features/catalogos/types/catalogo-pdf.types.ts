@@ -3,11 +3,11 @@ export interface CatalogoPDFItem {
 
   nombre_producto: string;
 
+  descripcion: string | null;
+
   cantidad: number;
 
   precio_unitario: number;
-
-  subtotal: number;
 
   imagen_url: string | null;
 
@@ -19,10 +19,6 @@ export interface CatalogoPDF {
   nombre_cliente: string;
 
   tipo_lista: string;
-
-  subtotal: number;
-
-  total: number;
 
   fecha_vencimiento: string;
 
