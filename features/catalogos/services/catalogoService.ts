@@ -59,6 +59,7 @@ export const catalogoService = {
         catalogo_id: catalogo.id,
         producto_id: item.producto.id,
         nombre_producto: item.producto.nombre,
+        descripcion: item.producto.descripcion ?? null,
         precio_unitario: precio,
         cantidad: item.cantidad,
         subtotal: precio * item.cantidad,

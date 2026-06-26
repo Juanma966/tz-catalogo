@@ -23,6 +23,7 @@ export interface CatalogoItem {
   catalogo_id: string;
   producto_id: string | null;
   nombre_producto: string;
+  descripcion: string | null;
   cantidad: number;
   precio_unitario: number;
   subtotal: number;
