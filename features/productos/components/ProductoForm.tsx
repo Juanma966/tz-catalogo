@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/form';
 import { uploadImagen } from '@/lib/storage/uploadImagen';
 import { createClient } from '@/lib/supabase/client';
+import { useCategorias } from '@/features/categorias/hooks/useCategorias';
 import type { Producto, CrearProductoInput } from '../types/producto.types';
 
 const schema = z.object({
@@ -27,6 +28,7 @@ const schema = z.object({
   precio_base: z.coerce.number().positive('El precio debe ser mayor a 0'),
   precio_mayorista: z.coerce.number().positive('Debe ser mayor a 0').optional().or(z.literal('')),
   codigo_sku: z.string().max(50).optional(),
+  categoria_id: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -38,6 +40,7 @@ interface ProductoFormProps {
 }
 
 export const ProductoForm: FC<ProductoFormProps> = ({ producto, onSuccess, onCancel }) => {
+  const { categorias } = useCategorias();
   const [imagenPreview, setImagenPreview] = useState<string | null>(producto?.imagen_url ?? null);
   const [imagenFile, setImagenFile] = useState<File | null>(null);
   const [guardando, setGuardando] = useState(false);
@@ -53,6 +56,7 @@ export const ProductoForm: FC<ProductoFormProps> = ({ producto, onSuccess, onCan
       precio_base: producto?.precio_base ?? 0,
       precio_mayorista: producto?.precio_mayorista ?? '',
       codigo_sku: producto?.codigo_sku ?? '',
+      categoria_id: producto?.categoria_id ?? '',
     },
   });
 
@@ -103,6 +107,7 @@ export const ProductoForm: FC<ProductoFormProps> = ({ producto, onSuccess, onCan
           : null,
         codigo_sku: values.codigo_sku || undefined,
         imagen_url: imagen_url ?? undefined,
+        categoria_id: values.categoria_id || null,
       };
 
       if (producto) {
@@ -206,6 +211,24 @@ export const ProductoForm: FC<ProductoFormProps> = ({ producto, onSuccess, onCan
             <FormLabel className="text-gray-700">Código SKU</FormLabel>
             <FormControl>
               <Input placeholder="Ej: HP-LAP-001" className="border-gray-300 focus:border-blue-500" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )} />
+
+        <FormField control={form.control} name="categoria_id" render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-gray-700">Categoría</FormLabel>
+            <FormControl>
+              <select
+                {...field}
+                className="h-8 w-full rounded-lg border border-gray-300 bg-transparent px-2.5 text-sm text-gray-900 outline-none focus:border-blue-500 focus:ring-3 focus:ring-blue-500/20"
+              >
+                <option value="">Sin categoría</option>
+                {categorias.filter((c) => c.activo).map((c) => (
+                  <option key={c.id} value={c.id}>{c.nombre}</option>
+                ))}
+              </select>
             </FormControl>
             <FormMessage />
           </FormItem>

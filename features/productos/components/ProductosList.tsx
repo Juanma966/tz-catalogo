@@ -83,6 +83,7 @@ export const ProductosList: FC = () => {
               <TableHead className="text-gray-500 font-medium w-16">Imagen</TableHead>
               <TableHead className="text-gray-500 font-medium">Nombre</TableHead>
               <TableHead className="text-gray-500 font-medium">SKU</TableHead>
+              <TableHead className="text-gray-500 font-medium">Categoría</TableHead>
               <TableHead className="text-gray-500 font-medium text-right">Precio</TableHead>
               <TableHead className="text-gray-500 font-medium text-center">Estado</TableHead>
               <TableHead className="text-gray-500 font-medium text-right">Acciones</TableHead>
@@ -95,6 +96,7 @@ export const ProductosList: FC = () => {
                   <TableCell><Skeleton className="w-10 h-10 rounded bg-gray-200" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-40 bg-gray-200" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-20 bg-gray-200" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-24 bg-gray-200" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-16 ml-auto bg-gray-200" /></TableCell>
                   <TableCell><Skeleton className="h-6 w-16 mx-auto bg-gray-200" /></TableCell>
                   <TableCell><Skeleton className="h-8 w-20 ml-auto bg-gray-200" /></TableCell>
@@ -102,7 +104,7 @@ export const ProductosList: FC = () => {
               ))
             ) : productos.length === 0 ? (
               <TableRow className="hover:bg-transparent">
-                <TableCell colSpan={6} className="text-center text-gray-400 py-12">
+                <TableCell colSpan={7} className="text-center text-gray-400 py-12">
                   No hay productos. Creá el primero.
                 </TableCell>
               </TableRow>
@@ -127,6 +129,7 @@ export const ProductosList: FC = () => {
                     )}
                   </TableCell>
                   <TableCell className="text-gray-500 text-sm">{producto.codigo_sku ?? '—'}</TableCell>
+                  <TableCell className="text-gray-500 text-sm">{producto.categoria?.nombre ?? '—'}</TableCell>
                   <TableCell className="text-right font-medium text-gray-900">
                     {FORMATO_PRECIO.format(producto.precio_base)}
                   </TableCell>
