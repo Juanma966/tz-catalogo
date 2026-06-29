@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useProductos } from '@/features/productos/hooks/useProductos';
+import { useCategorias } from '@/features/categorias/hooks/useCategorias';
 import type { ItemSeleccionado, NuevoCatalogoForm, TipoLista } from '../types/catalogo.types';
 
 const FORMATO_PRECIO = new Intl.NumberFormat('es-AR', {
@@ -23,12 +24,14 @@ export const PasoProductos: FC<PasoProductosProps> = ({ items: itemsIniciales, t
   const precioVisible = (p: { precio_base: number; precio_mayorista?: number | null }) =>
     esMayorista ? (p.precio_mayorista ?? p.precio_base) : p.precio_base;
   const { productos, loading } = useProductos();
+  const { categorias } = useCategorias();
   const [seleccionados, setSeleccionados] = useState<Map<string, ItemSeleccionado>>(() => {
     const mapa = new Map<string, ItemSeleccionado>();
     itemsIniciales.forEach((item) => mapa.set(item.producto.id, item));
     return mapa;
   });
   const [error, setError] = useState('');
+  const [categoriaFiltro, setCategoriaFiltro] = useState<string>('todas');
 
   const toggleProducto = (productoId: string) => {
     setSeleccionados((prev) => {
@@ -57,9 +60,42 @@ export const PasoProductos: FC<PasoProductosProps> = ({ items: itemsIniciales, t
   };
 
   const productosActivos = productos.filter((p) => p.activo);
+  const productosFiltrados = categoriaFiltro === 'todas'
+    ? productosActivos
+    : productosActivos.filter((p) => p.categoria_id === categoriaFiltro);
 
   return (
     <div className="space-y-4">
+      {!loading && productosActivos.length > 0 && (
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          <button
+            type="button"
+            onClick={() => setCategoriaFiltro('todas')}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap border transition-colors ${
+              categoriaFiltro === 'todas'
+                ? 'bg-blue-600 text-white border-blue-600'
+                : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+            }`}
+          >
+            Todas
+          </button>
+          {categorias.filter((c) => c.activo).map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              onClick={() => setCategoriaFiltro(c.id)}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap border transition-colors ${
+                categoriaFiltro === c.id
+                  ? 'bg-blue-600 text-white border-blue-600'
+                  : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+              }`}
+            >
+              {c.nombre}
+            </button>
+          ))}
+        </div>
+      )}
+
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -70,9 +106,13 @@ export const PasoProductos: FC<PasoProductosProps> = ({ items: itemsIniciales, t
         <p className="text-gray-400 text-sm text-center py-8">
           No tenés productos activos. Creá productos primero.
         </p>
+      ) : productosFiltrados.length === 0 ? (
+        <p className="text-gray-400 text-sm text-center py-8">
+          No hay productos en esta categoría.
+        </p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[60vh] overflow-y-auto pr-1">
-          {productosActivos.map((producto) => {
+          {productosFiltrados.map((producto) => {
             const seleccionado = seleccionados.get(producto.id);
             return (
               <div

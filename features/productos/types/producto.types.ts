@@ -10,6 +10,8 @@ export interface Producto {
   activo: boolean;
   created_at: string;
   updated_at: string;
+  categoria_id: string | null;
+  categoria?: { id:string; nombre:string } | null;
 }
 
 export interface CrearProductoInput {
@@ -20,6 +22,7 @@ export interface CrearProductoInput {
   codigo_sku?: string;
   imagen_url?: string;
   activo?: boolean;
+  categoria_id?: string | null;
 }
 
 export type ActualizarProductoInput = Partial<CrearProductoInput>;
