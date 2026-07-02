@@ -14,11 +14,12 @@ const FORMATO_PRECIO = new Intl.NumberFormat('es-AR', {
 interface PasoResumenProps {
   form: NuevoCatalogoForm;
   guardando: boolean;
+  modoEdicion?: boolean;
   onConfirmar: () => void;
   onAtras: () => void;
 }
 
-export const PasoResumen: FC<PasoResumenProps> = ({ form, guardando, onConfirmar, onAtras }) => {
+export const PasoResumen: FC<PasoResumenProps> = ({ form, guardando, modoEdicion, onConfirmar, onAtras }) => {
   const total = form.items.reduce(
     (acc, { producto, cantidad }) => acc + producto.precio_base * cantidad, 0
   );
@@ -84,7 +85,9 @@ export const PasoResumen: FC<PasoResumenProps> = ({ form, guardando, onConfirmar
           ← Atrás
         </Button>
         <Button onClick={onConfirmar} disabled={guardando} className="min-w-32 bg-blue-600 hover:bg-blue-700 text-white">
-          {guardando ? <Loader2 size={16} className="animate-spin" /> : 'Crear catálogo'}
+          {guardando
+            ? <Loader2 size={16} className="animate-spin" />
+            : modoEdicion ? 'Guardar cambios' : 'Crear catálogo'}
         </Button>
       </div>
     </div>
