@@ -1,7 +1,7 @@
 'use client';
 
 import { FC, useState } from 'react';
-import { ExternalLink, FileText, Loader2, Plus, Trash2 } from 'lucide-react';
+import { ExternalLink, FileText, Loader2, Pencil, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -18,12 +18,32 @@ import { useCatalogos } from '../hooks/useCatalogos';
 import { useGenerarPDF } from '../hooks/useGenerarPDF';
 import { catalogoService } from '../services/catalogoService';
 import { CompartirWhatsAppButton } from './CompartirWhatsAppButton';
+import type { CatalogoConItems } from '../types/catalogo.types';
 
 export const CatalogosList: FC = () => {
   const { catalogos, loading, error, reload } = useCatalogos();
   const { generarPDF, generando } = useGenerarPDF(reload);
   const [wizardOpen, setWizardOpen] = useState(false);
   const [eliminando, setEliminando] = useState<string | null>(null);
+  const [editando, setEditando] = useState<string | null>(null);
+  const [catalogoEditar, setCatalogoEditar] = useState<CatalogoConItems | null>(null);
+
+  const handleEditar = async (id: string) => {
+    setEditando(id);
+    try {
+      const catalogo = await catalogoService.obtenerConItems(id);
+      setCatalogoEditar(catalogo);
+    } catch {
+      toast.error('No se pudo cargar el catálogo');
+    } finally {
+      setEditando(null);
+    }
+  };
+
+  const handleEditarSuccess = () => {
+    setCatalogoEditar(null);
+    reload();
+  };
 
   const handleEliminar = async (id: string, nombreCliente: string) => {
     if (!confirm(`¿Eliminar el catálogo de ${nombreCliente}?`)) return;
@@ -86,7 +106,7 @@ export const CatalogosList: FC = () => {
               </TableRow>
             ) : (
               catalogos.map((catalogo) => {
-                const ocupado = generando === catalogo.id || eliminando === catalogo.id;
+                const ocupado = generando === catalogo.id || eliminando === catalogo.id || editando === catalogo.id;
                 return (
                   <TableRow key={catalogo.id} className="border-gray-100 hover:bg-gray-50">
                     <TableCell className="font-medium text-gray-900">{catalogo.nombre_cliente}</TableCell>
@@ -117,6 +137,19 @@ export const CatalogosList: FC = () => {
                               nombreCliente={catalogo.nombre_cliente}
                             />
                         )}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          disabled={ocupado}
+                          onClick={() => handleEditar(catalogo.id)}
+                          className="h-8 w-8 text-gray-400 hover:text-blue-600 hover:bg-blue-50 disabled:opacity-50"
+                          title="Editar"
+                        >
+                          {editando === catalogo.id
+                            ? <Loader2 size={14} className="animate-spin" />
+                            : <Pencil size={14} />
+                          }
+                        </Button>
                         <Button
                           variant="ghost"
                           size="icon"
@@ -159,6 +192,21 @@ export const CatalogosList: FC = () => {
             onSuccess={handleSuccess}
             onCancel={() => setWizardOpen(false)}
           />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!catalogoEditar} onOpenChange={(v) => !v && setCatalogoEditar(null)}>
+        <DialogContent className="bg-white border-gray-200 text-gray-900 w-[calc(100%-2rem)] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-gray-900">Editar catálogo</DialogTitle>
+          </DialogHeader>
+          {catalogoEditar && (
+            <NuevoCatalogoWizard
+              catalogo={catalogoEditar}
+              onSuccess={handleEditarSuccess}
+              onCancel={() => setCatalogoEditar(null)}
+            />
+          )}
         </DialogContent>
       </Dialog>
     </div>

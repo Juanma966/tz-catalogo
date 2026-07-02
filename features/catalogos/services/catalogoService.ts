@@ -74,6 +74,62 @@ export const catalogoService = {
     return catalogo;
   },
 
+  async actualizar(id: string, form: NuevoCatalogoForm): Promise<void> {
+    const supabase = createClient();
+
+    const esMayorista = form.tipo_lista === 'mayorista';
+    const precioEfectivo = (p: typeof form.items[0]['producto']) =>
+      esMayorista ? (p.precio_mayorista ?? p.precio_base) : p.precio_base;
+
+    const subtotal = form.items.reduce(
+      (acc, { producto, cantidad }) => acc + precioEfectivo(producto) * cantidad,
+      0
+    );
+
+    // Actualizar cabecera. Al modificar los productos, el PDF anterior queda
+    // desactualizado: se vuelve a 'borrador' y se limpia el pdf_url para regenerar.
+    const { error: errorCatalogo } = await supabase
+      .from('catalogos')
+      .update({
+        nombre_cliente: form.nombre_cliente,
+        tipo_lista: form.tipo_lista,
+        fecha_vencimiento: form.fecha_vencimiento,
+        subtotal,
+        total: subtotal,
+        estado: 'borrador',
+        pdf_url: null,
+      })
+      .eq('id', id);
+
+    if (errorCatalogo) throw new Error(errorCatalogo.message);
+
+    // Reemplazar los items: eliminar los actuales e insertar los nuevos.
+    const { error: errorDelete } = await supabase
+      .from('catalogo_items')
+      .delete()
+      .eq('catalogo_id', id);
+
+    if (errorDelete) throw new Error(errorDelete.message);
+
+    const items = form.items.map((item, index) => {
+      const precio = precioEfectivo(item.producto);
+      return {
+        catalogo_id: id,
+        producto_id: item.producto.id,
+        nombre_producto: item.producto.nombre,
+        descripcion: item.producto.descripcion ?? null,
+        precio_unitario: precio,
+        cantidad: item.cantidad,
+        subtotal: precio * item.cantidad,
+        imagen_url: item.producto.imagen_url,
+        posicion: index + 1,
+      };
+    });
+
+    const { error: errorItems } = await supabase.from('catalogo_items').insert(items);
+    if (errorItems) throw new Error(errorItems.message);
+  },
+
   async actualizarEstado(id: string, estado: EstadoCatalogo): Promise<void> {
     const supabase = createClient();
     const { error } = await supabase

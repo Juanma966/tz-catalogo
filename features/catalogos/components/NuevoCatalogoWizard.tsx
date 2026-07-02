@@ -7,7 +7,11 @@ import { catalogoService } from '../services/catalogoService';
 import { PasoConfiguracion } from './PasoConfiguracion';
 import { PasoProductos } from './PasoProductos';
 import { PasoResumen } from './PasoResumen';
-import type { NuevoCatalogoForm, ItemSeleccionado } from '../types/catalogo.types';
+import type {
+  NuevoCatalogoForm,
+  ItemSeleccionado,
+  CatalogoConItems,
+} from '../types/catalogo.types';
 
 const PASOS = ['Configuración', 'Productos', 'Resumen'];
 
@@ -18,14 +22,48 @@ const FORM_INICIAL: NuevoCatalogoForm = {
   items: [],
 };
 
+// Reconstruye el formulario a partir de un catálogo existente (modo edición).
+// Los items guardados se convierten en ItemSeleccionado usando el precio_unitario
+// almacenado tanto para precio_base como mayorista para que el total no cambie.
+const formDesdeCatalogo = (catalogo: CatalogoConItems): NuevoCatalogoForm => ({
+  nombre_cliente: catalogo.nombre_cliente,
+  tipo_lista: catalogo.tipo_lista,
+  fecha_vencimiento: catalogo.fecha_vencimiento,
+  items: catalogo.catalogo_items
+    .slice()
+    .sort((a, b) => a.posicion - b.posicion)
+    .map((item) => ({
+      cantidad: item.cantidad,
+      producto: {
+        id: item.producto_id ?? item.id,
+        empresa_id: catalogo.empresa_id,
+        nombre: item.nombre_producto,
+        descripcion: item.descripcion,
+        precio_base: item.precio_unitario,
+        precio_mayorista: item.precio_unitario,
+        imagen_url: item.imagen_url,
+        codigo_sku: null,
+        activo: true,
+        created_at: item.created_at,
+        updated_at: item.created_at,
+        categoria_id: null,
+      },
+    })),
+});
+
 interface NuevoCatalogoWizardProps {
   onSuccess: () => void;
   onCancel: () => void;
+  /** Si se pasa, el wizard funciona en modo edición. */
+  catalogo?: CatalogoConItems;
 }
 
-export const NuevoCatalogoWizard: FC<NuevoCatalogoWizardProps> = ({ onSuccess }) => {
+export const NuevoCatalogoWizard: FC<NuevoCatalogoWizardProps> = ({ onSuccess, catalogo }) => {
+  const modoEdicion = !!catalogo;
   const [paso, setPaso] = useState(0);
-  const [form, setForm] = useState<NuevoCatalogoForm>(FORM_INICIAL);
+  const [form, setForm] = useState<NuevoCatalogoForm>(
+    () => (catalogo ? formDesdeCatalogo(catalogo) : FORM_INICIAL)
+  );
   const [guardando, setGuardando] = useState(false);
 
   const handlePaso1 = (valores: Pick<NuevoCatalogoForm, 'nombre_cliente' | 'tipo_lista' | 'fecha_vencimiento'>) => {
@@ -41,19 +79,28 @@ export const NuevoCatalogoWizard: FC<NuevoCatalogoWizardProps> = ({ onSuccess })
   const handleConfirmar = async () => {
     setGuardando(true);
     try {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      const { data: usuario } = await supabase
-        .from('usuarios')
-        .select('empresa_id, id')
-        .eq('id', user!.id)
-        .single();
+      if (modoEdicion) {
+        await catalogoService.actualizar(catalogo!.id, form);
+        toast.success('Catálogo actualizado correctamente');
+      } else {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        const { data: usuario } = await supabase
+          .from('usuarios')
+          .select('empresa_id, id')
+          .eq('id', user!.id)
+          .single();
 
-      await catalogoService.crear(usuario!.empresa_id, usuario!.id, form);
-      toast.success('Catálogo creado correctamente');
+        await catalogoService.crear(usuario!.empresa_id, usuario!.id, form);
+        toast.success('Catálogo creado correctamente');
+      }
       onSuccess();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Error al crear el catálogo');
+      toast.error(
+        e instanceof Error
+          ? e.message
+          : `Error al ${modoEdicion ? 'actualizar' : 'crear'} el catálogo`
+      );
     } finally {
       setGuardando(false);
     }
@@ -84,7 +131,7 @@ export const NuevoCatalogoWizard: FC<NuevoCatalogoWizardProps> = ({ onSuccess })
 
       {paso === 0 && <PasoConfiguracion datos={form} onSiguiente={handlePaso1} />}
       {paso === 1 && <PasoProductos items={form.items} tipoLista={form.tipo_lista} onSiguiente={handlePaso2} onAtras={() => setPaso(0)} />}
-      {paso === 2 && <PasoResumen form={form} guardando={guardando} onConfirmar={handleConfirmar} onAtras={() => setPaso(1)} />}
+      {paso === 2 && <PasoResumen form={form} guardando={guardando} modoEdicion={modoEdicion} onConfirmar={handleConfirmar} onAtras={() => setPaso(1)} />}
     </div>
   );
 };
